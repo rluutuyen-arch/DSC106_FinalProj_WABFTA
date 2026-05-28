@@ -1,0 +1,306 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  background: #f5f5f3;
+  color: #1a1a1a;
+  max-width: 1380px;
+  margin: 0 auto;
+  padding: 32px 24px 48px;
+}
+
+/* ── Header ── */
+header {
+  margin-bottom: 28px;
+}
+
+.header-tags {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  color: #888;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+h1 {
+  font-size: 2.6rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #111;
+  line-height: 1.15;
+  margin-bottom: 10px;
+}
+
+.subtitle {
+  font-size: 1rem;
+  color: #555;
+  max-width: 680px;
+  line-height: 1.55;
+}
+
+.authors {
+  font-size: 13px;
+  color: #888;
+  margin-top: 8px;
+}
+
+/* ── Stat cards ── */
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.stat-card {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 18px 20px;
+}
+
+.stat-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #888;
+  margin-bottom: 6px;
+}
+
+.stat-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #111;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.stat-sub {
+  font-size: 12px;
+  color: #888;
+}
+
+/* ── Main layout ── */
+.main-layout {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+
+/* ── Map panel ── */
+.map-panel {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 16px;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+#map-svg {
+  display: block;
+  background: #0a0a0f;
+  border-radius: 4px;
+  width: 100%;
+  height: auto;
+}
+
+.legend-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.legend-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #666;
+  white-space: nowrap;
+}
+
+#legend-svg {
+  display: block;
+}
+
+/* ── Side panel ── */
+.side-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 380px;
+  flex-shrink: 0;
+}
+
+.chart-block {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.panel-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: #555;
+  margin-bottom: 4px;
+}
+
+.panel-sub {
+  font-size: 11px;
+  color: #999;
+  margin-bottom: 10px;
+  line-height: 1.4;
+}
+
+#ts-svg, #hist-svg {
+  display: block;
+  width: 100%;
+  overflow: visible;
+}
+
+/* ── Controls ── */
+.controls-bar {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 36px;
+}
+
+.ctrl-btn {
+  background: #1a1a1a;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 18px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s;
+}
+.ctrl-btn:hover { background: #333; }
+
+.speed-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #555;
+}
+
+.speed-wrap select {
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 4px 6px;
+  font-size: 12px;
+  background: #fff;
+}
+
+.slider-wrap {
+  flex: 1;
+}
+
+.slider-wrap input[type=range] {
+  width: 100%;
+  accent-color: #e07b39;
+}
+
+.time-label {
+  font-size: 12px;
+  color: #555;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Tooltip ── */
+.tooltip {
+  position: fixed;
+  background: rgba(20,20,20,0.9);
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 5px;
+  font-size: 12px;
+  pointer-events: none;
+  z-index: 999;
+  transition: opacity 0.1s;
+}
+.tooltip.hidden { opacity: 0; }
+
+/* ── Writeup ── */
+.writeup {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 40px 48px;
+  max-width: 860px;
+}
+
+.writeup h2 {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #111;
+  margin-bottom: 28px;
+}
+
+.writeup h3 {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #e07b39;
+  margin-top: 28px;
+  margin-bottom: 8px;
+}
+
+.writeup p {
+  font-size: 14px;
+  line-height: 1.7;
+  color: #333;
+  margin-bottom: 12px;
+}
+
+.writeup em {
+  font-style: italic;
+}
+
+footer {
+  margin-top: 36px;
+  font-size: 11px;
+  color: #aaa;
+}
+
+/* ── D3 chart axes ── */
+.tick text {
+  font-size: 10px;
+  fill: #666;
+}
+.tick line, .domain {
+  stroke: #ddd;
+}
+.axis-label {
+  font-size: 10px;
+  fill: #888;
+}
+
+/* ── Anomaly marker on time series ── */
+.anomaly-marker {
+  fill: #e05050;
+  opacity: 0.7;
+}
+
+#map-svg {
+  cursor: grab;
+}
+#map-svg:active {
+  cursor: grabbing;
+}

@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Western Hemisphere SST Viewer · NOAA GOES</title>
+  <script type="module" src="main.js"></script>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/topojson-client@3/dist/topojson-client.min.js"></script>
+</head>
+<body>
+
+  <header>
+    <div class="header-tags">GOES-16 &middot; NOAA &middot; DSC106 PROJECT 3</div>
+    <h1>Western Hemisphere Sea Surface Temperature</h1>
+    <p class="subtitle">How does sea surface temperature shift across the Western Hemisphere over 72 hours, and how do these thermal patterns relate to major storm systems?</p>
+    <p class="authors">Evan Ngo &middot; Richard Wang &middot; Ryan Luutuyen &middot; Benson Zhu</p>
+  </header>
+
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-label">OBSERVATION PERIOD</div>
+      <div class="stat-value">Jul 28–30, 2020</div>
+      <div class="stat-sub">3 days &middot; 72 hourly frames</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">CURRENT MEAN SST</div>
+      <div class="stat-value" id="stat-mean">24.57°C</div>
+      <div class="stat-sub" id="stat-time">Tue Jul 28 2020 00:30 UTC</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">FRAME MIN SST</div>
+      <div class="stat-value" id="stat-min">0.81°C</div>
+      <div class="stat-sub">coldest observed pixel</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">FRAME MAX SST</div>
+      <div class="stat-value" id="stat-max">33.69°C</div>
+      <div class="stat-sub">warmest observed pixel</div>
+    </div>
+  </div>
+
+  <div class="main-layout">
+
+    <div class="map-panel">
+      <div class="panel-title">GOES-16 SST: Western Hemisphere</div>
+      <svg id="map-svg"></svg>
+      <div class="legend-wrap">
+        <span class="legend-label">SST (°C)</span>
+        <svg id="legend-svg" width="320" height="44"></svg>
+      </div>
+    </div>
+
+    <div class="side-panel">
+
+      <div class="chart-block">
+        <div class="panel-title">Mean SST Over Time</div>
+        <div class="panel-sub">Area-weighted mean sea surface temperature across all valid pixels per frame</div>
+        <svg id="ts-svg"></svg>
+      </div>
+
+      <div class="chart-block">
+        <div class="panel-title">Temperature Distribution</div>
+        <div class="panel-sub">Histogram of pixel SST values in the current frame (0–38°C)</div>
+        <svg id="hist-svg"></svg>
+      </div>
+      <div class="tip">
+        <p>Double click to reset zoom</p>
+      </div>
+    </div>
+    
+  </div>
+  
+  <div class="controls-bar">
+    <button id="play-btn" class="ctrl-btn">&#9654; Play</button>
+    <div class="speed-wrap">
+      <label for="speed-select">Speed</label>
+      <select id="speed-select">
+        <option value="2000">0.5×</option>
+        <option value="1000" selected>1×</option>
+        <option value="500">2×</option>
+        <option value="250">4×</option>
+      </select>
+    </div>
+    <div class="slider-wrap">
+      <input type="range" id="slider" min="0" max="71" value="0">
+    </div>
+    <span id="timeLabel" class="time-label">Frame 0 | Tue Jul 28 2020 00:30 UTC</span>
+  </div>
+
+  <div id="tooltip" class="tooltip hidden"></div>
+
+  <section class="writeup">
+    <h2>Design &amp; Process</h2>
+
+    <h3>Progress</h3>
+    <p>So far, our team has built the initial structure of our explorable explanation webpage, which focuses on how sea surface temperature shifts across the Western Hemisphere over a 72-hour period. We started by working with GOES-16 NOAA satellite sea surface temperature data and preprocessing it into a format that could be displayed interactively in D3.js. Since the original data is spatial, we transformed the coordinate values into x/y screen positions so they could be accurately rendered on the webpage, while also experimenting with different scaling methods to make the map clearer and easier to interpret. We also added a continent outline to give viewers more geographic context, so the temperature patterns are not shown as abstract pixels floating on a blank canvas.</p>
+    <p>In the current prototype, we have at least one working visualization with interaction, including a time-based animation/slider that lets users move through the 72 hourly frames. We also added supporting charts, including a mean sea surface temperature line chart and a temperature distribution histogram, so users can connect the spatial patterns on the map with broader statistical trends. Another major update is that we added zoom and pan functionality, which allows viewers to explore specific regions of the Western Hemisphere in more detail instead of only viewing the full map at once. Overall, our prototype now has the basic webpage layout, main visualization, interaction structure, and supporting explanatory elements needed for the final explorable explanation.</p>
+
+    <h3>Challenges</h3>
+    <p>The most challenging part of the project to design has been converting the satellite data into a clear and usable interactive visualization. Because the raw data is based on geographic/satellite coordinates, we had to figure out how to transform those values into x/y positions that would display correctly in the browser. This was especially challenging because small changes in scaling could make the visualization look distorted, too zoomed in, or too difficult to interpret. Adding the continent outline also required us to think carefully about alignment, since the outline needed to match the temperature pixels closely enough to provide context without distracting from the actual data.</p>
+    <p>Another challenge has been balancing visual complexity with performance and readability. The dataset contains many temperature points across many time frames, so we had to design the page in a way that allows smooth interaction without overwhelming the viewer. We also had to decide which interactions actually help explain the data, rather than adding features just for the sake of interactivity. Moving forward, we plan to refine the annotations, explanatory text, and visualization so the webpage feels more like an explorable explanation instead of just a dashboard, which matches the final project goal of using interactive visualizations to explain a complex subject.</p>
+
+    <footer>DSC 106 Project 3 &middot; UC San Diego &middot; Data: NOAA GOES-16 via AWS Open Data</footer>
+  </section>
+
+</body>
+</html>
