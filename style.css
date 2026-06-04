@@ -48,7 +48,7 @@ h1 {
 /* ── Stat cards ── */
 .stats-row {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 16px;
   margin-bottom: 28px;
 }
@@ -287,6 +287,27 @@ footer {
 .storm-name {
   transition: color 0.4s ease;
 }
+
+/* ── Storm fuel additions ── */
+.fuel-card { border-left: 3px solid #1f9d55; }
+
+#map-svg .cell { transition: opacity 0.2s; }
+#map-svg.fuel-mode .cell.below-threshold { opacity: 0.1; }
+
+.fuel-toggle {
+  margin-left: auto;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #333;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.fuel-toggle:hover { border-color: #999; }
+.fuel-toggle.active { background: #1f9d55; border-color: #1f9d55; color: #fff; }
 
 /* ── D3 chart axes ── */
 .tick text {

@@ -122,6 +122,10 @@ function stormColor(status) {
   return '#aaaaaa';
 }
 
+// ── Storm fuel constants ────────────────────────────────────────────────────
+const SST_THRESHOLD  = 26;   // °C — minimum SST to sustain a tropical cyclone
+const FUEL_RADIUS_PX = 60;   // sampling radius (px) around the eye — tune to taste
+
 // ── Color scale (shared across map, legend, histogram) ─────────────────────
 const COLOR_DOMAIN = [16, 32];
 const color = d3.scaleSequential()
@@ -234,6 +238,11 @@ const stormTrackPast = stormG.append('polyline')
 let currentStormState = null;
 const stormEyeG = stormG.append('g').attr('class', 'storm-eye').attr('display', 'none').style('cursor', 'pointer');
 stormEyeG.append('circle').attr('class', 'eye-ring').attr('r', 14).attr('fill', 'none').attr('stroke-width', 2.5);
+stormEyeG.append('circle').attr('class', 'fuel-ring')
+  .attr('r', FUEL_RADIUS_PX).attr('fill', 'none')
+  .attr('stroke', '#fff').attr('stroke-width', 1)
+  .attr('stroke-dasharray', '2 4').attr('opacity', 0.35)
+  .attr('pointer-events', 'none');
 stormEyeG.append('circle').attr('class', 'eye-dot').attr('r', 6);
 stormEyeG.append('text').attr('class', 'eye-label')
   .attr('dy', -16).attr('text-anchor', 'middle')
@@ -408,6 +417,36 @@ tsG.selectAll('.ts-dot')
   .attr('r', 2)
   .attr('fill', '#e07b39');
 
+// ── STORM INTENSITY OVERLAY (right axis) ─────────────────────────────────────
+const windSeries = d3.range(72).map(f => {
+  const st = getStormState(f);
+  return { frame: f, wind: st ? st.wind : null };
+});
+const yWind = d3.scaleLinear().domain([20, 70]).range([tsH, 0]);
+
+tsG.append('g')
+  .attr('transform', `translate(${tsW},0)`)
+  .call(d3.axisRight(yWind).ticks(4).tickFormat(d => `${d}kt`))
+  .call(g => g.select('.domain').attr('stroke', '#ddd'))
+  .call(g => g.selectAll('text').attr('fill', '#c0392b'));
+
+tsG.append('path')
+  .datum(windSeries)
+  .attr('fill', 'none')
+  .attr('stroke', '#c0392b')
+  .attr('stroke-width', 1.8)
+  .attr('stroke-dasharray', '5 3')
+  .attr('opacity', 0.85)
+  .attr('d', d3.line()
+    .x(d => xTs(d.frame))
+    .y(d => yWind(d.wind))
+    .defined(d => d.wind !== null));
+
+tsG.append('text')
+  .attr('x', tsW).attr('y', -6).attr('text-anchor', 'end')
+  .attr('font-size', 8).attr('fill', '#c0392b').attr('font-weight', 700)
+  .text('Isaias winds (kt)');
+
 // Cursor (vertical line + dot that tracks current frame)
 const tsCursor = tsG.append('line')
   .attr('y1', 0).attr('y2', tsH)
@@ -560,6 +599,42 @@ function updateStormOverlay(frame) {
   d3.select('#stat-storm-name').style('color', col);
 }
 
+// ── STORM FUEL METRICS ─────────────────────────────────────────────────────
+function computeFuelMetrics(data, eyeXY) {
+  const valid = data.filter(d => d.temp >= 0 && d.temp <= 40);
+  const pctAbove = valid.length
+    ? valid.filter(d => d.temp >= SST_THRESHOLD).length / valid.length * 100
+    : null;
+
+  let nearMean = null;
+  if (eyeXY) {
+    const [ex, ey] = eyeXY;
+    let sum = 0, n = 0;
+    for (const d of valid) {
+      const dx = xScale(d.x) - ex, dy = yScale(d.y) - ey;
+      if (dx * dx + dy * dy <= FUEL_RADIUS_PX * FUEL_RADIUS_PX) { sum += d.temp; n++; }
+    }
+    if (n > 0) nearMean = sum / n;
+  }
+  return { pctAbove, nearMean };
+}
+
+function updateFuelCard({ pctAbove, nearMean }) {
+  const nm = d3.select('#stat-fuel-near');
+  const dv = d3.select('#stat-fuel-delta');
+  if (nearMean !== null) {
+    nm.text(`${nearMean.toFixed(1)}°C`)
+      .style('color', nearMean >= SST_THRESHOLD ? '#1f9d55' : '#e05050');
+    const delta = nearMean - SST_THRESHOLD;
+    dv.text(`${delta >= 0 ? '+' : ''}${delta.toFixed(1)}°C vs 26°C threshold`);
+  } else {
+    nm.text('—').style('color', '#111');
+    dv.text('storm off-map');
+  }
+  d3.select('#stat-fuel-pct')
+    .text(pctAbove !== null ? `${pctAbove.toFixed(0)}% of basin above 26°C` : '—');
+}
+
 // ── GRID CELLS ───────────────────────────────────────────────────────────────
 const GRID_COLS = 50;
 const GRID_ROWS = 35;
@@ -611,8 +686,12 @@ function drawFrame(frameNum) {
       .attr('y',      d => yScale(Y_MIN + (d.row + 1) * CELL_H_ANG))
       .attr('width',  CELL_W_PX)
       .attr('height', CELL_H_PX)
-      .attr('fill',   d => color(d.mean));
+      .attr('fill',   d => color(d.mean))
+      .classed('below-threshold', d => d.mean < SST_THRESHOLD);
     rects.exit().remove();
+
+    const eyeXY = currentStormState && currentStormState.xy ? currentStormState.xy : null;
+    updateFuelCard(computeFuelMetrics(data, eyeXY));
 
     drawHistogram(data);
   });
@@ -645,6 +724,16 @@ function stopPlay() {
 d3.select('#play-btn').on('click', () => running ? stopPlay() : startPlay());
 d3.select('#speed-select').on('change', () => { if (running) { stopPlay(); startPlay(); } });
 d3.select('#slider').on('input', function () { curFrame = +this.value; drawFrame(curFrame); });
+
+// Fuel-zone toggle
+let fuelMode = false;
+d3.select('#fuel-toggle').on('click', () => {
+  fuelMode = !fuelMode;
+  mapSvg.classed('fuel-mode', fuelMode);
+  d3.select('#fuel-toggle')
+    .classed('active', fuelMode)
+    .text(fuelMode ? '26°C fuel zone: ON' : 'Show 26°C fuel zone');
+});
 
 // ── INIT ─────────────────────────────────────────────────────────────────────
 drawLegend();

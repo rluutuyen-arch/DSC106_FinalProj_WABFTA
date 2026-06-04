@@ -44,6 +44,12 @@
       <div class="stat-sub" id="stat-storm-status">Disturbance</div>
       <div class="stat-sub" id="stat-storm-wind">~25 kt winds</div>
     </div>
+    <div class="stat-card fuel-card">
+      <div class="stat-label">STORM FUEL</div>
+      <div class="stat-value" id="stat-fuel-near">28.4°C</div>
+      <div class="stat-sub" id="stat-fuel-delta">+2.4°C vs 26°C threshold</div>
+      <div class="stat-sub" id="stat-fuel-pct">71% of basin above 26°C</div>
+    </div>
   </div>
 
   <div class="main-layout">
@@ -54,6 +60,7 @@
       <div class="legend-wrap">
         <span class="legend-label">SST (°C)</span>
         <svg id="legend-svg" width="320" height="44"></svg>
+        <button id="fuel-toggle" class="fuel-toggle">Show 26°C fuel zone</button>
       </div>
     </div>
 
@@ -61,7 +68,7 @@
 
       <div class="chart-block">
         <div class="panel-title">Mean SST Over Time</div>
-        <div class="panel-sub">Area-weighted mean sea surface temperature across all valid pixels per frame</div>
+        <div class="panel-sub">Area-weighted mean SST per frame (orange) with Isaias wind speed (red, right axis)</div>
         <svg id="ts-svg"></svg>
       </div>
 
@@ -104,11 +111,11 @@
     <p>Watch the storm marker as you scrub through the frames. On July 28 it is still a disorganized tropical wave in the far eastern Atlantic, moving across relatively cooler open-ocean water (~27°C). By July 30 it has crossed into the warmest part of the Caribbean basin and rapidly strengthened from a tropical depression into a hurricane in less than 36 hours — a process meteorologists call <em>rapid intensification</em>. The mean SST chart on the right shows a corresponding uptick in basin-wide temperatures over that same period.</p>
 
     <h3>Reading the Map</h3>
-    <p>The color scale runs from deep purple (cool, ~16°C) through orange to yellow (warm, ~32°C). The <strong>solid track line</strong> traces Isaias's path up to the current frame; the <strong>faint dashed line</strong> shows where it will go. Hover over the storm eye marker for wind speed and position. You can also zoom and pan — try zooming into the Caribbean to see how closely the storm tracks along the 29–31°C band. The two red warning triangles on the mean SST chart flag frames with incomplete satellite coverage (sensor noise or cloud interference).</p>
+    <p>The color scale runs from deep purple (cool, ~16°C) through orange to yellow (warm, ~32°C). The <strong>solid track line</strong> traces Isaias's path up to the current frame; the <strong>faint dashed line</strong> shows where it will go. Hover over the storm eye marker for wind speed and position. You can also zoom and pan — try zooming into the Caribbean to see how closely the storm tracks along the 29–31°C band. The two red warning triangles on the mean SST chart flag frames with incomplete satellite coverage (sensor noise or cloud interference). Toggle <strong>"Show 26°C fuel zone"</strong> to dim every pixel below the tropical-cyclone threshold, leaving only the warm water that can actually sustain a storm — then scrub to July 30 and watch the eye sit deep inside the lit-up reservoir.</p>
 
     <h3>Challenges &amp; Design Decisions</h3>
     <p>Converting GOES-16 satellite data to screen coordinates required implementing the full GOES-R fixed-grid projection, which maps satellite scan angles to geographic positions. Small errors in that transform produce visually distorted maps, so we validated the output against known coastline positions. Rendering 72 hourly frames of thousands of SST pixels at interactive speeds required binning raw data points into a 50×35 grid before drawing, which reduces draw calls by roughly 40× while preserving the spatial structure of the SST field.</p>
-    <p>The storm track is derived from NHC HURDAT2 best-track data and interpolated to each hourly frame. Because HURDAT2 records positions every 6 hours, the animated eye position is linearly interpolated between advisory fixes — an approximation that is accurate enough to illustrate the SST–storm relationship but should not be treated as a precise storm-center location for any given hour.</p>
+    <p>The storm track is derived from NHC HURDAT2 best-track data and interpolated to each hourly frame. Because HURDAT2 records positions every 6 hours, the animated eye position is linearly interpolated between advisory fixes — an approximation that is accurate enough to illustrate the SST–storm relationship but should not be treated as a precise storm-center location for any given hour. The "Storm Fuel" card and the dashed sampling ring around the eye report the mean SST of the pixels immediately surrounding the storm, alongside the share of the basin above 26°C, tying the thermal field directly to the storm's available energy.</p>
 
     <footer>DSC 106 Project 3 &middot; UC San Diego &middot; Data: NOAA GOES-16 via AWS Open Data &middot; Storm track: NHC HURDAT2 AL092020</footer>
   </section>
