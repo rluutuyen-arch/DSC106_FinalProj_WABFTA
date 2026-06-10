@@ -198,7 +198,7 @@ function latLonToXY(latDeg, lonDeg) {
 const geoProjection = d3.geoTransform({
   point(lonDeg, latDeg) {
     const xy = latLonToXY(latDeg, lonDeg);
-    if (xy) this.stream.point(xy[0], xy[1]);
+    if (xy) this.stream.point(xy[0] * 1.1 - 60, xy[1] * 1.1 - 20);
   }
 });
 
@@ -354,7 +354,7 @@ const tsG = tsSvg.append('g').attr('transform', `translate(${TS_M.left},${TS_M.t
 const dayStarts = [0, 24, 48];
 const dayLabels = ['Jul 28', 'Jul 29', 'Jul 30'];
 
-const xTs = d3.scaleLinear().domain([0, 71]).range([0, tsW]);
+const xTs = d3.scaleLinear().domain([0, 151]).range([0, tsW]);
 const yTs = d3.scaleLinear().domain([23.5, 25.2]).range([tsH, 0]);
 
 // Day separator lines
@@ -788,8 +788,8 @@ function buildConclusionCard() {
 }
 
 // ── GRID CELLS ───────────────────────────────────────────────────────────────
-const GRID_COLS = 50;
-const GRID_ROWS = 35;
+const GRID_COLS = 80;
+const GRID_ROWS = 60;
 const X_MIN = -0.151, X_MAX = 0.151;
 const Y_MIN = -0.151, Y_MAX = 0.151;
 const CELL_W_ANG = (X_MAX - X_MIN) / GRID_COLS;
@@ -824,7 +824,10 @@ function drawFrame(frameNum) {
   updateTsCursor(frameNum);
   updateStormOverlay(frameNum);
 
-  d3.json(`data/frame_${frameNum}.json`).then(data => {
+  
+  const fileIdx = frameNum * 2;
+  d3.json(`Isaiah/frame_${fileIdx}.json`).then(frame => {
+    const data = frame.pixels;
     const gridCells = buildGrid(data);
 
     const rects = dataG.selectAll('.cell').data(gridCells, d => d.key);
