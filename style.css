@@ -395,3 +395,16 @@ footer {
 #map-svg:active {
   cursor: grabbing;
 }
+
+.storm-select {
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 7px 10px;
+  font-size: 13px;
+  font-weight: 600;
+  background: #fff;
+  color: #1a1a1a;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.storm-select:focus { outline: 2px solid #e07b39; }

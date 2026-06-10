@@ -20,29 +20,29 @@
   <div class="stats-row">
     <div class="stat-card">
       <div class="stat-label">OBSERVATION PERIOD</div>
-      <div class="stat-value">Jul 28–30, 2020</div>
-      <div class="stat-sub">3 days &middot; 72 hourly frames</div>
+      <div class="stat-value" id="stat-obs-value">Sep 21 – Oct 3, 2022</div>
+      <div class="stat-sub" id="stat-obs-sub">13 days &middot; 2-hr frames</div>
     </div>
     <div class="stat-card">
       <div class="stat-label">CURRENT MEAN SST</div>
-      <div class="stat-value" id="stat-mean">24.57°C</div>
-      <div class="stat-sub" id="stat-time">Tue Jul 28 2020 00:30 UTC</div>
+      <div class="stat-value" id="stat-mean">—</div>
+      <div class="stat-sub" id="stat-time">Loading…</div>
     </div>
     <div class="stat-card">
       <div class="stat-label">FRAME MIN SST</div>
-      <div class="stat-value" id="stat-min">0.81°C</div>
+      <div class="stat-value" id="stat-min">—</div>
       <div class="stat-sub">coldest observed pixel</div>
     </div>
     <div class="stat-card">
       <div class="stat-label">FRAME MAX SST</div>
-      <div class="stat-value" id="stat-max">33.69°C</div>
+      <div class="stat-value" id="stat-max">—</div>
       <div class="stat-sub">warmest observed pixel</div>
     </div>
     <div class="stat-card storm-card">
       <div class="stat-label">ACTIVE STORM</div>
-      <div class="stat-value storm-name" id="stat-storm-name">Isaias</div>
-      <div class="stat-sub" id="stat-storm-status">Disturbance</div>
-      <div class="stat-sub" id="stat-storm-wind">~25 kt winds</div>
+      <div class="stat-value storm-name" id="stat-storm-name">Ian</div>
+      <div class="stat-sub" id="stat-storm-status">Category 4 Hurricane</div>
+      <div class="stat-sub" id="stat-storm-wind">Peak: 130 kt</div>
     </div>
     <div class="stat-card fuel-card">
       <div class="stat-label">STORM FUEL</div>
@@ -68,7 +68,7 @@
 
       <div class="chart-block">
         <div class="panel-title">Mean SST Over Time</div>
-        <div class="panel-sub">Area-weighted mean SST per frame (orange) with Isaias wind speed (red, right axis)</div>
+        <div class="panel-sub" id="panel-sub-ts">Mean SST per frame (orange) with Ian wind speed (red, right axis)</div>
         <svg id="ts-svg"></svg>
       </div>
 
@@ -91,6 +91,12 @@
   </div>
   
   <div class="controls-bar">
+    <select id="storm-select" class="storm-select">
+      <option value="ian" selected>Ian (2022)</option>
+      <option value="ida">Ida (2021)</option>
+      <option value="isaiah">Isaiah (2020)</option>
+      <option value="laura">Laura (2020)</option>
+    </select>
     <button id="play-btn" class="ctrl-btn">&#9654; Play</button>
     <div class="speed-wrap">
       <label for="speed-select">Speed</label>
@@ -102,7 +108,7 @@
       </select>
     </div>
     <div class="slider-wrap">
-      <input type="range" id="slider" min="0" max="155" value="0">
+      <input type="range" id="slider" min="0" max="156" value="0">
     </div>
     <span id="timeLabel" class="time-label">Frame 0 | Tue Jul 28 2020 00:30 UTC</span>
   </div>
