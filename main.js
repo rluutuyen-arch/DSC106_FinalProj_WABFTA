@@ -198,7 +198,7 @@ function latLonToXY(latDeg, lonDeg) {
 const geoProjection = d3.geoTransform({
   point(lonDeg, latDeg) {
     const xy = latLonToXY(latDeg, lonDeg);
-    if (xy) this.stream.point(xy[0] * 1.1 - 60, xy[1] * 1.1 - 20);
+    if (xy) this.stream.point(xy[0] * 1.1 - 50, xy[1] * 1.1 - 25);
   }
 });
 
@@ -354,7 +354,7 @@ const tsG = tsSvg.append('g').attr('transform', `translate(${TS_M.left},${TS_M.t
 const dayStarts = [0, 24, 48];
 const dayLabels = ['Jul 28', 'Jul 29', 'Jul 30'];
 
-const xTs = d3.scaleLinear().domain([0, 151]).range([0, tsW]);
+const xTs = d3.scaleLinear().domain([0, 155]).range([0, tsW]);
 const yTs = d3.scaleLinear().domain([23.5, 25.2]).range([tsH, 0]);
 
 // Day separator lines
@@ -865,7 +865,7 @@ function startPlay() {
   running = true;
   d3.select('#play-btn').html('&#9646;&#9646; Pause');
   playInterval = setInterval(() => {
-    curFrame = (curFrame + 1) % 72;
+    curFrame = (curFrame + 1) % 156;
     drawFrame(curFrame);
     d3.select('#slider').property('value', curFrame);
   }, getSpeed());
