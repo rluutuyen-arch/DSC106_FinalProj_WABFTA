@@ -1,119 +1,71 @@
 import * as d3 from 'https://cdn.jsdelivr.net/npm/d3@7.9.0/+esm';
 
-// ── Precomputed per-frame stats (mean/min/max from all pixels) ──────────────
-const FRAME_STATS = [
-  {frame:0,  time:"2020-07-28T00:30:05", mean:24.57, min:0.81,  max:33.69},
-  {frame:1,  time:"2020-07-28T01:30:05", mean:24.48, min:1.21,  max:33.69},
-  {frame:2,  time:"2020-07-28T02:30:05", mean:24.35, min:0.99,  max:34.92},
-  {frame:3,  time:"2020-07-28T03:30:05", mean:24.24, min:0.76,  max:33.81},
-  {frame:4,  time:"2020-07-28T04:30:05", mean:24.22, min:1.69,  max:33.28},
-  {frame:5,  time:"2020-07-28T05:30:05", mean:24.11, min:1.20,  max:32.35},
-  {frame:6,  time:"2020-07-28T06:30:05", mean:24.02, min:1.00,  max:32.30},
-  {frame:7,  time:"2020-07-28T07:30:05", mean:23.94, min:1.40,  max:32.18},
-  {frame:8,  time:"2020-07-28T08:30:05", mean:23.86, min:1.28,  max:32.32},
-  {frame:9,  time:"2020-07-28T09:30:05", mean:23.93, min:1.46,  max:32.38},
-  {frame:10, time:"2020-07-28T10:30:05", mean:24.13, min:1.31,  max:32.31},
-  {frame:11, time:"2020-07-28T11:30:05", mean:24.25, min:0.90,  max:32.12},
-  {frame:12, time:"2020-07-28T12:30:05", mean:24.27, min:1.18,  max:31.99},
-  {frame:13, time:"2020-07-28T13:30:05", mean:24.28, min:0.46,  max:33.02},
-  {frame:14, time:"2020-07-28T14:30:05", mean:24.28, min:0.63,  max:34.05},
-  {frame:15, time:"2020-07-28T15:30:05", mean:24.26, min:1.06,  max:33.88},
-  {frame:16, time:"2020-07-28T16:30:05", mean:24.36, min:0.56,  max:34.57},
-  {frame:17, time:"2020-07-28T17:30:05", mean:24.32, min:-0.09, max:35.24},
-  {frame:18, time:"2020-07-28T18:30:05", mean:24.33, min:0.42,  max:36.04},
-  {frame:19, time:"2020-07-28T19:30:05", mean:24.35, min:0.40,  max:35.62},
-  {frame:20, time:"2020-07-28T20:30:05", mean:24.39, min:1.34,  max:35.43},
-  {frame:21, time:"2020-07-28T21:30:05", mean:24.32, min:0.82,  max:36.72},
-  {frame:22, time:"2020-07-28T22:30:05", mean:24.38, min:-2.37, max:37.08},
-  {frame:23, time:"2020-07-28T23:30:05", mean:24.35, min:-0.81, max:35.89},
-  {frame:24, time:"2020-07-29T00:30:05", mean:24.29, min:-0.45, max:35.30},
-  {frame:25, time:"2020-07-29T01:30:05", mean:24.25, min:1.08,  max:35.42},
-  {frame:26, time:"2020-07-29T02:30:05", mean:24.05, min:-0.14, max:34.80},
-  {frame:27, time:"2020-07-29T03:30:05", mean:23.94, min:-1.32, max:34.07},
-  {frame:28, time:"2020-07-29T04:30:04", mean:23.93, min:-1.80, max:33.49},
-  {frame:29, time:"2020-07-29T05:30:05", mean:23.85, min:-0.28, max:32.81},
-  {frame:30, time:"2020-07-29T06:30:05", mean:23.80, min:0.21,  max:32.24},
-  {frame:31, time:"2020-07-29T07:30:05", mean:23.88, min:-1.62, max:32.61},
-  {frame:32, time:"2020-07-29T08:30:05", mean:23.85, min:-0.24, max:32.63},
-  {frame:33, time:"2020-07-29T09:30:04", mean:23.94, min:1.05,  max:32.65},
-  {frame:34, time:"2020-07-29T10:30:04", mean:23.95, min:2.26,  max:32.62},
-  {frame:35, time:"2020-07-29T11:30:04", mean:24.12, min:0.83,  max:32.47},
-  {frame:36, time:"2020-07-29T12:30:04", mean:24.11, min:1.55,  max:32.35},
-  {frame:37, time:"2020-07-29T13:30:04", mean:24.14, min:1.23,  max:32.42},
-  {frame:38, time:"2020-07-29T14:30:04", mean:24.08, min:1.48,  max:32.53},
-  {frame:39, time:"2020-07-29T15:30:04", mean:null,  min:null,  max:null,  anomaly:true},
-  {frame:40, time:"2020-07-29T16:30:04", mean:24.14, min:1.59,  max:35.01},
-  {frame:41, time:"2020-07-29T17:30:04", mean:23.80, min:null,  max:null,  anomaly:true},
-  {frame:42, time:"2020-07-29T18:30:04", mean:24.22, min:0.09,  max:34.78},
-  {frame:43, time:"2020-07-29T19:30:04", mean:24.30, min:-0.59, max:35.58},
-  {frame:44, time:"2020-07-29T20:30:04", mean:24.32, min:2.02,  max:36.53},
-  {frame:45, time:"2020-07-29T21:30:04", mean:24.32, min:1.85,  max:36.72},
-  {frame:46, time:"2020-07-29T22:30:04", mean:24.31, min:2.43,  max:37.02},
-  {frame:47, time:"2020-07-29T23:30:04", mean:24.30, min:1.17,  max:37.66},
-  {frame:48, time:"2020-07-30T00:30:04", mean:24.28, min:1.22,  max:37.41},
-  {frame:49, time:"2020-07-30T01:30:04", mean:24.24, min:1.55,  max:36.59},
-  {frame:50, time:"2020-07-30T02:30:04", mean:24.19, min:2.50,  max:35.91},
-  {frame:51, time:"2020-07-30T03:30:04", mean:24.10, min:2.77,  max:35.27},
-  {frame:52, time:"2020-07-30T04:30:04", mean:24.07, min:1.73,  max:34.82},
-  {frame:53, time:"2020-07-30T05:30:04", mean:24.01, min:0.70,  max:34.36},
-  {frame:54, time:"2020-07-30T06:30:04", mean:24.00, min:0.98,  max:34.10},
-  {frame:55, time:"2020-07-30T07:30:04", mean:24.00, min:1.31,  max:33.72},
-  {frame:56, time:"2020-07-30T08:30:04", mean:24.06, min:1.37,  max:33.42},
-  {frame:57, time:"2020-07-30T09:30:04", mean:24.21, min:0.60,  max:33.22},
-  {frame:58, time:"2020-07-30T10:30:04", mean:24.32, min:0.72,  max:33.27},
-  {frame:59, time:"2020-07-30T11:30:04", mean:24.51, min:0.71,  max:33.58},
-  {frame:60, time:"2020-07-30T12:30:04", mean:24.58, min:1.12,  max:33.42},
-  {frame:61, time:"2020-07-30T13:30:04", mean:24.60, min:0.85,  max:33.12},
-  {frame:62, time:"2020-07-30T14:30:04", mean:24.64, min:0.25,  max:33.75},
-  {frame:63, time:"2020-07-30T15:30:04", mean:24.70, min:0.62,  max:34.49},
-  {frame:64, time:"2020-07-30T16:30:04", mean:24.75, min:0.60,  max:34.77},
-  {frame:65, time:"2020-07-30T17:30:04", mean:24.82, min:0.90,  max:35.43},
-  {frame:66, time:"2020-07-30T18:30:04", mean:24.86, min:0.94,  max:35.99},
-  {frame:67, time:"2020-07-30T19:30:04", mean:24.94, min:-0.03, max:36.87},
-  {frame:68, time:"2020-07-30T20:30:04", mean:24.97, min:-0.36, max:37.51},
-  {frame:69, time:"2020-07-30T21:30:04", mean:24.84, min:-0.10, max:38.89},
-  {frame:70, time:"2020-07-30T22:30:04", mean:24.80, min:-0.40, max:39.70},
-  {frame:71, time:"2020-07-30T23:30:04", mean:24.68, min:0.43,  max:40.15},
-];
+const storms = {
+    'Laura':  {'date': new Date(Date.UTC(2020, 8, 27, 0, 30, 0)), 'frames': 155},
+    'Ida':    {'date': new Date(Date.UTC(2021, 8, 29, 0, 30, 0)), 'frames': 155},
+    'Ian':    {'date': new Date(Date.UTC(2022, 9, 28, 0, 30, 0)), 'frames': 152},
+    'Isaiah': {'date': new Date(Date.UTC(2020, 7, 29, 0, 30, 0)), 'frames': 156},
+}
+
+async function loadFrameStats(storm) {
+  const stats = [];
+  for(let i=0; i < 156; i++) {
+    const fileIdx = i*2;
+    const frame = await d3.json(`${storm}/frame_${fileIdx}.json`);
+    const temps = frame.pixels.map(p => p.temp);
+    const mean = d3.mean(temps);
+    const min = d3.min(temps);
+    const max = d3.max(temps); 
+    const t = new Date(storms[storm]['date'] + fileIdx * 3_600_000);
+    const iso = t.toISOString().replace('.000Z', 'Z');
+    stats.push({frame: i, time: iso.replace('Z', ''), mean, min, max});
+    console.log(i);
+  }
+  return stats;
+}
+
+let FRAME_STATS = await loadFrameStats('Ian');
+let frame_num = storms['Ian']['frames'];
 
 // ── Hurricane Isaias (AL092020) · NHC HURDAT2 approximate best track ─────────
 // 6-hourly positions during the Jul 28–30 observation window.
 // Verify exact coordinates at: nhc.noaa.gov/data/hurdat/hurdat2-1851-2020.txt
-const ISAIAS_TRACK = [
-  { iso:"2020-07-28T00:00:00Z", lat:12.2, lon:-55.2, wind:25, status:"Disturbance"        },
-  { iso:"2020-07-28T06:00:00Z", lat:12.5, lon:-57.0, wind:25, status:"Disturbance"        },
-  { iso:"2020-07-28T12:00:00Z", lat:12.9, lon:-58.8, wind:25, status:"Disturbance"        },
-  { iso:"2020-07-28T18:00:00Z", lat:13.2, lon:-60.3, wind:30, status:"Tropical Depression"},
-  { iso:"2020-07-29T00:00:00Z", lat:13.7, lon:-62.2, wind:30, status:"Tropical Depression"},
-  { iso:"2020-07-29T06:00:00Z", lat:14.2, lon:-64.1, wind:35, status:"Tropical Depression"},
-  { iso:"2020-07-29T12:00:00Z", lat:14.8, lon:-66.3, wind:40, status:"Tropical Depression"},
-  { iso:"2020-07-29T18:00:00Z", lat:15.5, lon:-68.4, wind:40, status:"Tropical Depression"},
-  { iso:"2020-07-30T00:00:00Z", lat:16.4, lon:-70.0, wind:45, status:"Tropical Storm"     },
-  { iso:"2020-07-30T06:00:00Z", lat:17.3, lon:-71.8, wind:55, status:"Tropical Storm"     },
-  { iso:"2020-07-30T12:00:00Z", lat:18.2, lon:-73.0, wind:60, status:"Tropical Storm"     },
-  { iso:"2020-07-30T18:00:00Z", lat:19.5, lon:-74.3, wind:65, status:"Hurricane"          },
-];
+// test
+// const ISAIAS_TRACK = [
+//   { iso:"2020-07-28T00:00:00Z", lat:12.2, lon:-55.2, wind:25, status:"Disturbance"        },
+//   { iso:"2020-07-28T06:00:00Z", lat:12.5, lon:-57.0, wind:25, status:"Disturbance"        },
+//   { iso:"2020-07-28T12:00:00Z", lat:12.9, lon:-58.8, wind:25, status:"Disturbance"        },
+//   { iso:"2020-07-28T18:00:00Z", lat:13.2, lon:-60.3, wind:30, status:"Tropical Depression"},
+//   { iso:"2020-07-29T00:00:00Z", lat:13.7, lon:-62.2, wind:30, status:"Tropical Depression"},
+//   { iso:"2020-07-29T06:00:00Z", lat:14.2, lon:-64.1, wind:35, status:"Tropical Depression"},
+//   { iso:"2020-07-29T12:00:00Z", lat:14.8, lon:-66.3, wind:40, status:"Tropical Depression"},
+//   { iso:"2020-07-29T18:00:00Z", lat:15.5, lon:-68.4, wind:40, status:"Tropical Depression"},
+//   { iso:"2020-07-30T00:00:00Z", lat:16.4, lon:-70.0, wind:45, status:"Tropical Storm"     },
+//   { iso:"2020-07-30T06:00:00Z", lat:17.3, lon:-71.8, wind:55, status:"Tropical Storm"     },
+//   { iso:"2020-07-30T12:00:00Z", lat:18.2, lon:-73.0, wind:60, status:"Tropical Storm"     },
+//   { iso:"2020-07-30T18:00:00Z", lat:19.5, lon:-74.3, wind:65, status:"Hurricane"          },
+// ];
 
-// Frame 0 starts at 2020-07-28T00:30:05Z; each subsequent frame is ~1 hour later.
-const FRAME0_MS = new Date("2020-07-28T00:30:05Z").getTime();
+// // Frame 0 starts at 2020-07-28T00:30:05Z; each subsequent frame is ~1 hour later.
+// const FRAME0_MS = new Date("2020-07-28T00:30:05Z").getTime();
 
-function getStormState(frame) {
-  const t   = FRAME0_MS + frame * 3600000;
-  const pts = ISAIAS_TRACK.map(d => ({ ...d, ms: new Date(d.iso).getTime() }));
-  if (t <= pts[0].ms) return { ...pts[0], xy: latLonToXY(pts[0].lat, pts[0].lon) };
-  const last = pts[pts.length - 1];
-  if (t >= last.ms)   return { ...last,   xy: latLonToXY(last.lat,   last.lon)   };
-  for (let i = 0; i < pts.length - 1; i++) {
-    if (t >= pts[i].ms && t < pts[i + 1].ms) {
-      const f   = (t - pts[i].ms) / (pts[i + 1].ms - pts[i].ms);
-      const lat  = pts[i].lat  + f * (pts[i + 1].lat  - pts[i].lat);
-      const lon  = pts[i].lon  + f * (pts[i + 1].lon  - pts[i].lon);
-      const wind = pts[i].wind + f * (pts[i + 1].wind - pts[i].wind);
-      return { lat, lon, wind, status: pts[i].status, xy: latLonToXY(lat, lon) };
-    }
-  }
-  return null;
-}
+// function getStormState(frame) {
+//   const t   = FRAME0_MS + frame * 3600000;
+//   const pts = ISAIAS_TRACK.map(d => ({ ...d, ms: new Date(d.iso).getTime() }));
+//   if (t <= pts[0].ms) return { ...pts[0], xy: latLonToXY(pts[0].lat, pts[0].lon) };
+//   const last = pts[pts.length - 1];
+//   if (t >= last.ms)   return { ...last,   xy: latLonToXY(last.lat,   last.lon)   };
+//   for (let i = 0; i < pts.length - 1; i++) {
+//     if (t >= pts[i].ms && t < pts[i + 1].ms) {
+//       const f   = (t - pts[i].ms) / (pts[i + 1].ms - pts[i].ms);
+//       const lat  = pts[i].lat  + f * (pts[i + 1].lat  - pts[i].lat);
+//       const lon  = pts[i].lon  + f * (pts[i + 1].lon  - pts[i].lon);
+//       const wind = pts[i].wind + f * (pts[i + 1].wind - pts[i].wind);
+//       return { lat, lon, wind, status: pts[i].status, xy: latLonToXY(lat, lon) };
+//     }
+//   }
+//   return null;
+// }
 
 function stormColor(status) {
   if (status === 'Hurricane')           return '#ff3b3b';
@@ -238,40 +190,41 @@ fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json')
 
 // ── STORM TRACK LAYER ────────────────────────────────────────────────────────
 // Full projected track as a faint dashed guide (drawn once at startup)
-const allTrackXY = ISAIAS_TRACK.map(d => latLonToXY(d.lat, d.lon)).filter(Boolean);
-stormG.append('polyline')
-  .attr('points', allTrackXY.map(p => p.join(',')).join(' '))
-  .attr('fill', 'none')
-  .attr('stroke', '#ffffff')
-  .attr('stroke-width', 1.5)
-  .attr('stroke-dasharray', '4 5')
-  .attr('opacity', 0.45)
-  .attr('pointer-events', 'none');
+// test
+// const allTrackXY = ISAIAS_TRACK.map(d => latLonToXY(d.lat, d.lon)).filter(Boolean);
+// stormG.append('polyline')
+//   .attr('points', allTrackXY.map(p => p.join(',')).join(' '))
+//   .attr('fill', 'none')
+//   .attr('stroke', '#ffffff')
+//   .attr('stroke-width', 1.5)
+//   .attr('stroke-dasharray', '4 5')
+//   .attr('opacity', 0.45)
+//   .attr('pointer-events', 'none');
 
-// Past track segment — color + length update each frame
-const stormTrackPast = stormG.append('polyline')
-  .attr('fill', 'none')
-  .attr('stroke-width', 2.5)
-  .attr('stroke-linecap', 'round')
-  .attr('stroke-linejoin', 'round')
-  .attr('opacity', 0.9)
-  .attr('pointer-events', 'none');
+// // Past track segment — color + length update each frame
+// const stormTrackPast = stormG.append('polyline')
+//   .attr('fill', 'none')
+//   .attr('stroke-width', 2.5)
+//   .attr('stroke-linecap', 'round')
+//   .attr('stroke-linejoin', 'round')
+//   .attr('opacity', 0.9)
+//   .attr('pointer-events', 'none');
 
-// Storm eye marker
-let currentStormState = null;
-const stormEyeG = stormG.append('g').attr('class', 'storm-eye').attr('display', 'none').style('cursor', 'pointer');
-stormEyeG.append('circle').attr('class', 'eye-ring').attr('r', 14).attr('fill', 'none').attr('stroke-width', 2.5);
-stormEyeG.append('circle').attr('class', 'fuel-ring')
-  .attr('r', FUEL_RADIUS_PX).attr('fill', 'none')
-  .attr('stroke', '#fff').attr('stroke-width', 1)
-  .attr('stroke-dasharray', '2 4').attr('opacity', 0.35)
-  .attr('pointer-events', 'none');
-stormEyeG.append('circle').attr('class', 'eye-dot').attr('r', 6);
-stormEyeG.append('text').attr('class', 'eye-label')
-  .attr('dy', -16).attr('text-anchor', 'middle')
-  .attr('font-size', 10).attr('font-weight', 700)
-  .attr('fill', '#fff').attr('pointer-events', 'none')
-  .attr('paint-order', 'stroke').attr('stroke', '#000').attr('stroke-width', 2);
+// // Storm eye marker
+// let currentStormState = null;
+// const stormEyeG = stormG.append('g').attr('class', 'storm-eye').attr('display', 'none').style('cursor', 'pointer');
+// stormEyeG.append('circle').attr('class', 'eye-ring').attr('r', 14).attr('fill', 'none').attr('stroke-width', 2.5);
+// stormEyeG.append('circle').attr('class', 'fuel-ring')
+//   .attr('r', FUEL_RADIUS_PX).attr('fill', 'none')
+//   .attr('stroke', '#fff').attr('stroke-width', 1)
+//   .attr('stroke-dasharray', '2 4').attr('opacity', 0.35)
+//   .attr('pointer-events', 'none');
+// stormEyeG.append('circle').attr('class', 'eye-dot').attr('r', 6);
+// stormEyeG.append('text').attr('class', 'eye-label')
+//   .attr('dy', -16).attr('text-anchor', 'middle')
+//   .attr('font-size', 10).attr('font-weight', 700)
+//   .attr('fill', '#fff').attr('pointer-events', 'none')
+//   .attr('paint-order', 'stroke').attr('stroke', '#000').attr('stroke-width', 2);
 
 // Tooltip
 const tooltip = d3.select('#tooltip');
@@ -289,19 +242,20 @@ function hideTooltip() {
 }
 
 // Rich tooltip when hovering the storm eye
-stormEyeG
-  .on('mouseover', (event) => {
-    if (!currentStormState) return;
-    const { wind, status, lat, lon } = currentStormState;
-    tooltip.classed('hidden', false)
-      .style('left', (event.clientX + 14) + 'px')
-      .style('top',  (event.clientY - 32) + 'px')
-      .html(`<strong>Isaias</strong><br>${status}<br>${Math.round(wind)} kt &nbsp;(${Math.round(wind * 1.852)} km/h)<br>${lat.toFixed(1)}°N, ${Math.abs(lon).toFixed(1)}°W`);
-  })
-  .on('mousemove', (event) => {
-    tooltip.style('left', (event.clientX + 14) + 'px').style('top', (event.clientY - 32) + 'px');
-  })
-  .on('mouseleave', hideTooltip);
+// test
+// stormEyeG
+//   .on('mouseover', (event) => {
+//     if (!currentStormState) return;
+//     const { wind, status, lat, lon } = currentStormState;
+//     tooltip.classed('hidden', false)
+//       .style('left', (event.clientX + 14) + 'px')
+//       .style('top',  (event.clientY - 32) + 'px')
+//       .html(`<strong>Isaias</strong><br>${status}<br>${Math.round(wind)} kt &nbsp;(${Math.round(wind * 1.852)} km/h)<br>${lat.toFixed(1)}°N, ${Math.abs(lon).toFixed(1)}°W`);
+//   })
+//   .on('mousemove', (event) => {
+//     tooltip.style('left', (event.clientX + 14) + 'px').style('top', (event.clientY - 32) + 'px');
+//   })
+//   .on('mouseleave', hideTooltip);
 
 // ── ZOOM/PAN ────────────────────────────────────────────────────────────────
 const zoom = d3.zoom()
@@ -441,10 +395,11 @@ tsG.selectAll('.ts-dot')
   .attr('fill', '#e07b39');
 
 // ── STORM INTENSITY OVERLAY (right axis) ─────────────────────────────────────
-const windSeries = d3.range(72).map(f => {
-  const st = getStormState(f);
-  return { frame: f, wind: st ? st.wind : null };
-});
+// test
+// const windSeries = d3.range(72).map(f => {
+//   const st = getStormState(f);
+//   return { frame: f, wind: st ? st.wind : null };
+// });
 const yWind = d3.scaleLinear().domain([20, 70]).range([tsH, 0]);
 
 tsG.append('g')
@@ -453,17 +408,18 @@ tsG.append('g')
   .call(g => g.select('.domain').attr('stroke', '#ddd'))
   .call(g => g.selectAll('text').attr('fill', '#c0392b'));
 
-tsG.append('path')
-  .datum(windSeries)
-  .attr('fill', 'none')
-  .attr('stroke', '#c0392b')
-  .attr('stroke-width', 1.8)
-  .attr('stroke-dasharray', '5 3')
-  .attr('opacity', 0.85)
-  .attr('d', d3.line()
-    .x(d => xTs(d.frame))
-    .y(d => yWind(d.wind))
-    .defined(d => d.wind !== null));
+//test
+// tsG.append('path')
+//   .datum(windSeries)
+//   .attr('fill', 'none')
+//   .attr('stroke', '#c0392b')
+//   .attr('stroke-width', 1.8)
+//   .attr('stroke-dasharray', '5 3')
+//   .attr('opacity', 0.85)
+//   .attr('d', d3.line()
+//     .x(d => xTs(d.frame))
+//     .y(d => yWind(d.wind))
+//     .defined(d => d.wind !== null));
 
 tsG.append('text')
   .attr('x', tsW).attr('y', -6).attr('text-anchor', 'end')
@@ -586,41 +542,42 @@ function updateStatCards(frame) {
 }
 
 // ── STORM OVERLAY ─────────────────────────────────────────────────────────────
-function updateStormOverlay(frame) {
-  const state = getStormState(frame);
-  currentStormState = state;
+//test
+// function updateStormOverlay(frame) {
+//   const state = getStormState(frame);
+//   currentStormState = state;
 
-  if (!state || !state.xy) { stormEyeG.attr('display', 'none'); return; }
+//   if (!state || !state.xy) { stormEyeG.attr('display', 'none'); return; }
 
-  const [px, py] = state.xy;
-  const col = stormColor(state.status);
+//   const [px, py] = state.xy;
+//   const col = stormColor(state.status);
 
-  // Position + color the eye marker
-  stormEyeG.attr('display', null).attr('transform', `translate(${px},${py})`);
-  stormEyeG.select('.eye-ring').attr('stroke', col);
-  stormEyeG.select('.eye-dot').attr('fill', col);
-  stormEyeG.select('.eye-label').text('Isaias');
+//   // Position + color the eye marker
+//   stormEyeG.attr('display', null).attr('transform', `translate(${px},${py})`);
+//   stormEyeG.select('.eye-ring').attr('stroke', col);
+//   stormEyeG.select('.eye-dot').attr('fill', col);
+//   stormEyeG.select('.eye-label').text('Isaias');
 
-  // Past track: all HURDAT2 points up to current time + interpolated current position
-  const t = FRAME0_MS + frame * 3600000;
-  const pastXY = ISAIAS_TRACK
-    .filter(d => new Date(d.iso).getTime() <= t)
-    .map(d => latLonToXY(d.lat, d.lon))
-    .filter(Boolean);
-  pastXY.push(state.xy);
-  stormTrackPast.attr('points', pastXY.map(p => p.join(',')).join(' ')).attr('stroke', col);
+//   // Past track: all HURDAT2 points up to current time + interpolated current position
+//   const t = FRAME0_MS + frame * 3600000;
+//   const pastXY = ISAIAS_TRACK
+//     .filter(d => new Date(d.iso).getTime() <= t)
+//     .map(d => latLonToXY(d.lat, d.lon))
+//     .filter(Boolean);
+//   pastXY.push(state.xy);
+//   stormTrackPast.attr('points', pastXY.map(p => p.join(',')).join(' ')).attr('stroke', col);
 
-  // Update storm stat card
-  const shortStatus = {
-    'Disturbance':        'Disturbance',
-    'Tropical Depression':'Trop. Depression',
-    'Tropical Storm':     'Tropical Storm',
-    'Hurricane':          'Hurricane Cat. 1',
-  }[state.status] || state.status;
-  d3.select('#stat-storm-status').text(shortStatus);
-  d3.select('#stat-storm-wind').text(`${Math.round(state.wind)} kt winds`);
-  d3.select('#stat-storm-name').style('color', col);
-}
+//   // Update storm stat card
+//   const shortStatus = {
+//     'Disturbance':        'Disturbance',
+//     'Tropical Depression':'Trop. Depression',
+//     'Tropical Storm':     'Tropical Storm',
+//     'Hurricane':          'Hurricane Cat. 1',
+//   }[state.status] || state.status;
+//   d3.select('#stat-storm-status').text(shortStatus);
+//   d3.select('#stat-storm-wind').text(`${Math.round(state.wind)} kt winds`);
+//   d3.select('#stat-storm-name').style('color', col);
+// }
 
 // ── STORM FUEL METRICS ─────────────────────────────────────────────────────
 function computeFuelMetrics(data, eyeXY) {
@@ -822,7 +779,7 @@ function drawFrame(frameNum) {
 
   updateStatCards(frameNum);
   updateTsCursor(frameNum);
-  updateStormOverlay(frameNum);
+  //updateStormOverlay(frameNum);
 
   
   const fileIdx = frameNum * 2;
@@ -845,10 +802,10 @@ function drawFrame(frameNum) {
       .classed('below-threshold', d => d.mean < SST_THRESHOLD);
     rects.exit().remove();
 
-    const eyeXY = currentStormState && currentStormState.xy ? currentStormState.xy : null;
-    const fuelMetrics = computeFuelMetrics(data, eyeXY);
-    updateFuelCard(fuelMetrics);
-    updateInsightCard(frameNum, fuelMetrics);
+    //const eyeXY = currentStormState && currentStormState.xy ? currentStormState.xy : null;
+    // const fuelMetrics = computeFuelMetrics(data, eyeXY);
+    // updateFuelCard(fuelMetrics);
+    // updateInsightCard(frameNum, fuelMetrics);
 
     drawHistogram(data);
   });
