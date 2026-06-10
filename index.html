@@ -77,6 +77,12 @@
         <div class="panel-sub">Histogram of pixel SST values in the current frame (0–38°C)</div>
         <svg id="hist-svg"></svg>
       </div>
+      <div class="chart-block insight-card">
+        <div class="panel-title">WHAT'S HAPPENING NOW</div>
+        <div class="insight-headline" id="insight-headline">Loading&hellip;</div>
+        <p class="insight-body" id="insight-body"></p>
+      </div>
+
       <div class="tip">
         <p>Double click to reset zoom</p>
       </div>
@@ -102,6 +108,11 @@
   </div>
 
   <div id="tooltip" class="tooltip hidden"></div>
+
+  <section class="conclusion-section">
+    <div class="panel-title" style="margin-bottom:14px;">TEMPERATURE PATTERNS ACROSS STORMS</div>
+    <div id="conclusion-content"></div>
+  </section>
 
   <section class="writeup">
     <h2>What to Look For</h2>

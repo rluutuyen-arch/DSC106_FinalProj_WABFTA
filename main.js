@@ -126,6 +126,29 @@ function stormColor(status) {
 const SST_THRESHOLD  = 26;   // °C — minimum SST to sustain a tropical cyclone
 const FUEL_RADIUS_PX = 60;   // sampling radius (px) around the eye — tune to taste
 
+// ── Storm summaries (one entry per integrated hurricane dataset) ────────────
+// Values are computed from each storm's FRAME_STATS-equivalent array so they
+// stay current when data is updated. Add new entries as additional storms are
+// wired into the visualization — the conclusion card renders from this array.
+const _vf = FRAME_STATS.filter(f => f.mean !== null);
+const STORM_SUMMARIES = [
+  {
+    name:       'Isaias · Jul 28–30, 2020',
+    peakStatus: 'Category 1 Hurricane',
+    peakWind:   65,
+    firstMean:  _vf[0].mean,
+    lastMean:   _vf[_vf.length - 1].mean,
+    minMean:    d3.min(_vf, f => f.mean),
+    maxMean:    d3.max(_vf, f => f.mean),
+    frames:     FRAME_STATS,          // reference kept for diurnal calculation
+  },
+  // Add more storms here when integrating their datasets:
+  // { name: 'Ian · Sep 24–27, 2022', peakStatus: 'Category 4 Hurricane', peakWind: 155,
+  //   firstMean: X, lastMean: X, minMean: X, maxMean: X, frames: IAN_FRAME_STATS },
+  // { name: 'Laura · Aug 25–27, 2020', peakStatus: 'Category 4 Hurricane', peakWind: 150,
+  //   firstMean: X, lastMean: X, minMean: X, maxMean: X, frames: LAURA_FRAME_STATS },
+];
+
 // ── Color scale (shared across map, legend, histogram) ─────────────────────
 const COLOR_DOMAIN = [16, 32];
 const color = d3.scaleSequential()
@@ -635,6 +658,135 @@ function updateFuelCard({ pctAbove, nearMean }) {
     .text(pctAbove !== null ? `${pctAbove.toFixed(0)}% of basin above 26°C` : '—');
 }
 
+// ── FRAME INSIGHT ─────────────────────────────────────────────────────────────
+// Returns rolling trend over the last n valid frames (negative = cooling).
+function getMeanTrend(frame, n = 3) {
+  const curr = FRAME_STATS[frame];
+  if (!curr || curr.mean === null) return 0;
+  let count = 0;
+  for (let i = frame - 1; i >= 0; i--) {
+    if (FRAME_STATS[i].mean !== null && ++count >= n)
+      return curr.mean - FRAME_STATS[i].mean;
+  }
+  return 0;
+}
+
+// Generates a {headline, body} insight object purely from data — no hardcoded
+// temperatures or frame numbers, so it works whenever FRAME_STATS is updated.
+function getFrameInsight(frame, { nearMean, pctAbove }) {
+  const s = FRAME_STATS[frame];
+  if (!s || s.mean === null)
+    return { headline: 'Data Gap', body: 'Satellite coverage incomplete for this frame — sensor artifacts or heavy cloud cover.' };
+
+  const trend = getMeanTrend(frame);
+  const st    = getStormState(frame);
+  const near  = nearMean !== null ? `${nearMean.toFixed(1)}°C` : null;
+  const pct   = pctAbove !== null ? `${Math.round(pctAbove)}%` : null;
+
+  if (st && st.status === 'Hurricane') {
+    const fuelNote = near
+      ? (nearMean >= SST_THRESHOLD
+          ? ` ${near} near the eye — ${(nearMean - SST_THRESHOLD).toFixed(1)}°C above the 26°C fuel threshold.`
+          : ` ${near} near the eye — approaching the 26°C fuel limit, weakening possible.`)
+      : '';
+    return {
+      headline: 'Hurricane Intensity Reached',
+      body: `Isaias at ${Math.round(st.wind)} kt.${fuelNote}${pct ? ' ' + pct + ' of the basin remains above 26°C.' : ''}`
+    };
+  }
+
+  if (trend <= -0.07)
+    return {
+      headline: 'SST Dropping',
+      body: `Basin mean fell ~${Math.abs(trend).toFixed(2)}°C over the last few frames. Overnight radiative cooling or storm-driven upwelling can bring cooler subsurface water to the surface.`
+    };
+
+  if (trend >= 0.07)
+    return {
+      headline: 'SST Rising',
+      body: `Basin mean rose ~${trend.toFixed(2)}°C. Solar heating typically peaks in mid-afternoon frames — visible as the orange SST line climbs on the time-series chart.`
+    };
+
+  if (st && st.status === 'Tropical Storm')
+    return {
+      headline: 'Active Tropical Storm',
+      body: `Isaias at ${Math.round(st.wind)} kt.${near ? ' SST near eye: ' + near + (nearMean >= SST_THRESHOLD ? ' — above the 26°C fuel threshold.' : ' — near the 26°C limit.') : ''}${pct ? ' ' + pct + ' of the basin is above 26°C.' : ''}`
+    };
+
+  if (st && st.status === 'Tropical Depression')
+    return {
+      headline: 'Tropical Depression',
+      body: `Isaias organizing at ${Math.round(st.wind)} kt. Nearby SST: ${near ?? '—'}. Sustained water above 26°C is needed to intensify further.`
+    };
+
+  if (st && st.status === 'Disturbance')
+    return {
+      headline: 'Tropical Disturbance',
+      body: `Disorganized wave present. Basin mean SST: ${s.mean.toFixed(2)}°C.${pct ? ' ' + pct + ' of observed water is above the 26°C storm-fuel threshold.' : ''}`
+    };
+
+  return {
+    headline: 'Conditions Stable',
+    body: `Mean SST: ${s.mean.toFixed(2)}°C with minimal change from recent frames.${pct ? ' ' + pct + ' of the basin is above 26°C.' : ''}`
+  };
+}
+
+function updateInsightCard(frame, fuelMetrics) {
+  const { headline, body } = getFrameInsight(frame, fuelMetrics);
+  d3.select('#insight-headline').text(headline);
+  d3.select('#insight-body').text(body);
+}
+
+// ── CONCLUSION CARD ───────────────────────────────────────────────────────────
+// Computed entirely from STORM_SUMMARIES — add a new entry there to extend.
+function buildConclusionCard() {
+  const container = d3.select('#conclusion-content');
+
+  STORM_SUMMARIES.forEach((storm, i) => {
+    const trend  = storm.lastMean - storm.firstMean;
+    const spread = storm.maxMean - storm.minMean;
+
+    // Diurnal amplitude — computed from the storm's own frames array
+    const byHour = d3.rollup(
+      storm.frames.filter(f => f.mean !== null),
+      v => d3.mean(v, d => d.mean),
+      d => +d.time.substring(11, 13)
+    );
+    const hours   = Array.from(byHour, ([h, m]) => ({ h, m }));
+    const peakH   = hours.reduce((a, b) => b.m > a.m ? b : a);
+    const troughH = hours.reduce((a, b) => b.m < a.m ? b : a);
+    const amp     = peakH.m - troughH.m;
+
+    const findings = [
+      `SST ranged ${storm.minMean.toFixed(2)}–${storm.maxMean.toFixed(2)}°C (${spread.toFixed(2)}°C spread).`,
+      `Basin mean ${trend >= 0 ? 'rose' : 'fell'} ${Math.abs(trend).toFixed(2)}°C from start to end — ${trend >= 0 ? 'daytime solar heating accumulated through the period' : 'overnight cooling and storm-driven mixing dominated'}.`,
+      `${storm.name.split('·')[0].trim()} reached ${storm.peakStatus} (${storm.peakWind} kt) while tracking over water above the 26°C threshold — warm SST was the primary energy source for intensification.`,
+      `Diurnal cycle: SST averaged ~${peakH.m.toFixed(2)}°C around ${peakH.h}:00 UTC vs ~${troughH.m.toFixed(2)}°C around ${troughH.h}:00 UTC — a ${amp.toFixed(2)}°C daily swing from solar heating and nocturnal cooling.`,
+    ];
+
+    if (i > 0) {
+      container.append('div').attr('class', 'conclusion-divider');
+    }
+
+    container.append('div').attr('class', 'conclusion-storm-label').text(storm.name);
+    findings.forEach(text => {
+      container.append('div').attr('class', 'conclusion-finding')
+        .html(`<span class="finding-dash">—</span><span>${text}</span>`);
+    });
+  });
+
+  // Cross-storm summary (auto-renders when 2+ storms are loaded)
+  if (STORM_SUMMARIES.length > 1) {
+    const avgTrend  = d3.mean(STORM_SUMMARIES, s => s.lastMean - s.firstMean);
+    const avgSpread = d3.mean(STORM_SUMMARIES, s => s.maxMean - s.minMean);
+    container.append('div').attr('class', 'conclusion-cross')
+      .html(`<strong>Cross-storm average (${STORM_SUMMARIES.length} storms):</strong> Basin SST ${avgTrend >= 0 ? 'rose' : 'fell'} ${Math.abs(avgTrend).toFixed(2)}°C on average, with a typical ${avgSpread.toFixed(2)}°C intra-period spread.`);
+  } else {
+    container.append('p').attr('class', 'conclusion-note')
+      .text('Add entries to STORM_SUMMARIES in main.js when integrating additional hurricane datasets to enable automatic cross-storm comparison here.');
+  }
+}
+
 // ── GRID CELLS ───────────────────────────────────────────────────────────────
 const GRID_COLS = 50;
 const GRID_ROWS = 35;
@@ -691,7 +843,9 @@ function drawFrame(frameNum) {
     rects.exit().remove();
 
     const eyeXY = currentStormState && currentStormState.xy ? currentStormState.xy : null;
-    updateFuelCard(computeFuelMetrics(data, eyeXY));
+    const fuelMetrics = computeFuelMetrics(data, eyeXY);
+    updateFuelCard(fuelMetrics);
+    updateInsightCard(frameNum, fuelMetrics);
 
     drawHistogram(data);
   });
@@ -738,3 +892,4 @@ d3.select('#fuel-toggle').on('click', () => {
 // ── INIT ─────────────────────────────────────────────────────────────────────
 drawLegend();
 drawFrame(0);
+buildConclusionCard();

@@ -309,6 +309,67 @@ footer {
 .fuel-toggle:hover { border-color: #999; }
 .fuel-toggle.active { background: #1f9d55; border-color: #1f9d55; color: #fff; }
 
+/* ── Insight card ── */
+.insight-card .insight-headline {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #111;
+  margin: 4px 0 6px;
+}
+.insight-card .insight-body {
+  font-size: 12px;
+  color: #444;
+  line-height: 1.55;
+  margin: 0;
+}
+
+/* ── Conclusion section ── */
+.conclusion-section {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 24px 32px;
+  margin-bottom: 20px;
+}
+.conclusion-storm-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 8px;
+  letter-spacing: 0.03em;
+}
+.conclusion-finding {
+  display: flex;
+  gap: 8px;
+  font-size: 13px;
+  color: #333;
+  line-height: 1.55;
+  margin-bottom: 6px;
+}
+.finding-dash {
+  flex-shrink: 0;
+  color: #e07b39;
+  font-weight: 700;
+}
+.conclusion-divider {
+  border-top: 1px solid #eee;
+  margin: 14px 0;
+}
+.conclusion-cross {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid #eee;
+  font-size: 13px;
+  color: #333;
+  line-height: 1.55;
+}
+.conclusion-note {
+  margin-top: 12px;
+  font-size: 11px;
+  color: #aaa;
+  font-style: italic;
+}
+
 /* ── D3 chart axes ── */
 .tick text {
   font-size: 10px;
