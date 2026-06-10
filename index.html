@@ -11,9 +11,9 @@
 <body>
 
   <header>
-    <div class="header-tags">GOES-16 &middot; NOAA &middot; DSC106 PROJECT 3</div>
+    <div class="header-tags">GOES-16 &middot; NOAA &middot; DSC106 Final Project</div>
     <h1>Western Hemisphere Sea Surface Temperature</h1>
-    <p class="subtitle">How does sea surface temperature shift across the Western Hemisphere over 72 hours, and how do these thermal patterns relate to major storm systems?</p>
+    <p class="subtitle">How does sea surface temperature shift across the Western Hemisphere over 13 days, and how do these thermal patterns relate to major storm systems?</p>
     <p class="authors">Evan Ngo &middot; Richard Wang &middot; Ryan Luutuyen &middot; Benson Zhu</p>
   </header>
 
@@ -124,9 +124,9 @@
     <h2>What to Look For</h2>
 
     <h3>SST as Storm Fuel</h3>
-    <p>Tropical cyclones are heat engines: they extract energy from warm ocean water and release it as wind and rain. Scientists generally set <strong>26°C as the threshold</strong> needed to sustain a tropical storm. In this visualization the Caribbean and Gulf of Mexico stay well above that mark throughout the 72-hour window — the bright orange and yellow pixels in the map represent water between 28–33°C, exactly the thermal reservoir that Isaias was drawing from as it organized and intensified westward across the Lesser Antilles.</p>
-    <p>Watch the storm marker as you scrub through the frames. On July 28 it is still a disorganized tropical wave in the far eastern Atlantic, moving across relatively cooler open-ocean water (~27°C). By July 30 it has crossed into the warmest part of the Caribbean basin and rapidly strengthened from a tropical depression into a hurricane in less than 36 hours — a process meteorologists call <em>rapid intensification</em>. The mean SST chart on the right shows a corresponding uptick in basin-wide temperatures over that same period.</p>
-
+    <p>Tropical cyclones are heat engines: they extract energy from warm ocean water and release it as wind and rain. Scientists generally set 26°C as the threshold needed to sustain a tropical storm. In this visualization the Caribbean and Gulf of Mexico stay well above that mark throughout the observation window — the bright orange and yellow pixels in the map represent water between 28–33°C, exactly the kind of thermal reservoir that fuels tropical development and intensification.</p>
+    <p>Watch the storm marker as you scrub through the frames. Early in the period the system is disorganized, moving across open-ocean water that may be near or just above the 26°C threshold. As it tracks westward into the warmest part of the basin, the storm draws on an increasingly deep reservoir of heat energy — a process that can trigger rapid intensification, where winds increase by 35 kt or more in under 24 hours. The mean SST chart on the right captures this thermal backdrop across the full observation window.</p>
+    <p>One subtler effect visible in some frames is the cold wake a storm leaves behind: as the eye passes, strong winds churn the ocean and bring cooler subsurface water up to replace the warm surface layer. This is one of the few natural brakes on intensification — if a storm stalls or loops back over its own cold wake, it can weaken rapidly even while still over tropical waters.</p>
     <h3>Reading the Map</h3>
     <p>The color scale runs from deep purple (cool, ~16°C) through orange to yellow (warm, ~32°C). The <strong>solid track line</strong> traces Isaias's path up to the current frame; the <strong>faint dashed line</strong> shows where it will go. Hover over the storm eye marker for wind speed and position. You can also zoom and pan — try zooming into the Caribbean to see how closely the storm tracks along the 29–31°C band. The two red warning triangles on the mean SST chart flag frames with incomplete satellite coverage (sensor noise or cloud interference). Toggle <strong>"Show 26°C fuel zone"</strong> to dim every pixel below the tropical-cyclone threshold, leaving only the warm water that can actually sustain a storm — then scrub to July 30 and watch the eye sit deep inside the lit-up reservoir.</p>
 
@@ -134,7 +134,7 @@
     <p>Converting GOES-16 satellite data to screen coordinates required implementing the full GOES-R fixed-grid projection, which maps satellite scan angles to geographic positions. Small errors in that transform produce visually distorted maps, so we validated the output against known coastline positions. Rendering 72 hourly frames of thousands of SST pixels at interactive speeds required binning raw data points into a 50×35 grid before drawing, which reduces draw calls by roughly 40× while preserving the spatial structure of the SST field.</p>
     <p>The storm track is derived from NHC HURDAT2 best-track data and interpolated to each hourly frame. Because HURDAT2 records positions every 6 hours, the animated eye position is linearly interpolated between advisory fixes — an approximation that is accurate enough to illustrate the SST–storm relationship but should not be treated as a precise storm-center location for any given hour. The "Storm Fuel" card and the dashed sampling ring around the eye report the mean SST of the pixels immediately surrounding the storm, alongside the share of the basin above 26°C, tying the thermal field directly to the storm's available energy.</p>
 
-    <footer>DSC 106 Project 3 &middot; UC San Diego &middot; Data: NOAA GOES-16 via AWS Open Data &middot; Storm track: NHC HURDAT2 AL092020</footer>
+    <footer>DSC 106 Final Project &middot; UC San Diego &middot; Data: NOAA GOES-16 via AWS Open Data &middot; Storm track: NHC HURDAT2 AL092020</footer>
   </section>
 
 </body>
