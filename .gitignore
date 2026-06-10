@@ -3,3 +3,17 @@ __pycache__/
 *.pyc
 .DS_Store
 Thumbs.db
+
+# Jupyter Notebook checkpoints folder
+.ipynb_checkpoints/
+*/.ipynb_checkpoints/*
+
+# Jupyter Lab workspace settings and state
+.jupyter/
+.local/share/jupyter/
+
+# IPython cache and history
+.ipython/
+
+# If you want to ignore ALL notebook files completely (optional)
+# *.ipynb
